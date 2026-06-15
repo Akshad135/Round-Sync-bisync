@@ -719,6 +719,14 @@ public class Rclone {
             Collections.addAll(directionParameter, "copy", remoteSection, localPath);
             directionParameter.addAll(defaultParameter);
             command = createCommandWithOptions(directionParameter);
+        }else if (syncDirection == SyncDirectionObject.SYNC_BIDIRECTIONAL) {
+            Collections.addAll(directionParameter, "bisync", localPath, remoteSection);
+            directionParameter.addAll(defaultParameter);
+            command = createCommandWithOptions(directionParameter);
+        }else if (syncDirection == SyncDirectionObject.SYNC_BIDIRECTIONAL_INITIAL) {
+            Collections.addAll(directionParameter, "bisync", localPath, remoteSection, "--resync");
+            directionParameter.addAll(defaultParameter);
+            command = createCommandWithOptions(directionParameter);
         }else {
             return null;
         }

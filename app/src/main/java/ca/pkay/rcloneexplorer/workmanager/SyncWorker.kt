@@ -19,6 +19,7 @@ import ca.pkay.rcloneexplorer.Items.Task
 import ca.pkay.rcloneexplorer.Log2File
 import ca.pkay.rcloneexplorer.R
 import ca.pkay.rcloneexplorer.Rclone
+import ca.pkay.rcloneexplorer.Items.SyncDirectionObject
 import ca.pkay.rcloneexplorer.notifications.GenericSyncNotification
 import ca.pkay.rcloneexplorer.notifications.ReportNotifications
 import ca.pkay.rcloneexplorer.notifications.SyncServiceNotifications
@@ -234,6 +235,10 @@ class SyncWorker (private var mContext: Context, workerParams: WorkerParameters)
         var content = mContext.getString(R.string.operation_failed_unknown, mTitle)
         when (failureReason) {
             FAILURE_REASON.NO_FAILURE -> {
+                if (mTask.direction == SyncDirectionObject.SYNC_BIDIRECTIONAL_INITIAL) {
+                    mTask.direction = SyncDirectionObject.SYNC_BIDIRECTIONAL
+                    mDatabase.updateTask(mTask)
+                }
                 showSuccessNotification(notificationId)
                 followupTask(mTask.onSuccessFollowup)
                 return

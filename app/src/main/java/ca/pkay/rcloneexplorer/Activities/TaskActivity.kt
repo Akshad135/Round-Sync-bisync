@@ -491,7 +491,15 @@ class TaskActivity : AppCompatActivity(), FolderSelectorCallback{
 
             override fun onNothingSelected(adapterView: AdapterView<*>?) {}
         }
-        syncDirection.setSelection((((existingTask?.direction?.minus(1)) ?: 0)) )
+        // Both SYNC_BIDIRECTIONAL (6) and SYNC_BIDIRECTIONAL_INITIAL (5) map to the same
+        // spinner position (4, the last item). Clamp to avoid out-of-bounds.
+        val directionValue = existingTask?.direction ?: 1
+        val selectionIndex = if (directionValue >= SyncDirectionObject.SYNC_BIDIRECTIONAL_INITIAL) {
+            SyncDirectionObject.SYNC_BIDIRECTIONAL_INITIAL - 1  // position 4
+        } else {
+            directionValue - 1
+        }
+        syncDirection.setSelection(selectionIndex)
     }
 
     private fun updateSpinnerDescription(value: Int) {
@@ -505,6 +513,7 @@ class TaskActivity : AppCompatActivity(), FolderSelectorCallback{
                 getString(R.string.description_sync_direction_copy_toremote)
             SyncDirectionObject.COPY_REMOTE_TO_LOCAL -> text =
                 getString(R.string.description_sync_direction_copy_tolocal)
+            SyncDirectionObject.SYNC_BIDIRECTIONAL_INITIAL,
             SyncDirectionObject.SYNC_BIDIRECTIONAL -> text =
                 getString(R.string.description_sync_direction_sync_bidirectional)
         }

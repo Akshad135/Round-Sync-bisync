@@ -334,6 +334,7 @@
     <string name="importer_unknown_error">Unknown error importing task!</string>
     <string name="sync_direction_copy_local_remote">Copy local to remote</string>
     <string name="sync_direction_copy_remote_local">Copy remote to local</string>
+    <string name="sync_direction_bidirectional">Bidirectional sync</string>
     <string name="copy">Copy</string>
     <string name="operation_success">%s sync successful</string>
     <string name="operation_success_description_zero">There was nothing to do.</string>
