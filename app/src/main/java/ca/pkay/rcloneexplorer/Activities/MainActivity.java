@@ -115,10 +115,8 @@ public class MainActivity extends AppCompatActivity
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean allPermissionsGranted = (new PermissionManager(this)).hasAllRequiredPermissions();
-        boolean completedIntroOnce = OnboardingActivity.Companion.completedIntro(this);
-        if(!allPermissionsGranted || !completedIntroOnce) {
-            startActivity(new Intent(this, OnboardingActivity.class));
-            finish();
+        if(!allPermissionsGranted) {
+            (new PermissionManager(this)).requestStorage(this);
         }
 
 

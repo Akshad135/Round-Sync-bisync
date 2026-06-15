@@ -40,7 +40,7 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".Activities.OnboardingActivity" />
+
         <activity
             android:name=".Activities.MainActivity"
             android:exported="true"
