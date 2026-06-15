@@ -4,8 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateUtils;
 import android.webkit.MimeTypeMap;
-import io.github.x0b.rfc3339parser.Rfc3339Parser;
-import io.github.x0b.rfc3339parser.Rfc3339Strict;
+import ca.pkay.rcloneexplorer.util.Rfc3339Helper;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -25,7 +24,7 @@ public class FileItem implements Parcelable {
     private boolean isDir;
 
     private boolean startAtRoot;
-    private static final Rfc3339Parser rfc3339Parser = new Rfc3339Strict();
+
 
     public FileItem(RemoteItem remote, String path, String name, long size, String modTime, String mimeType, boolean isDir, boolean startAtRoot) {
         this.remote = remote;
@@ -34,7 +33,7 @@ public class FileItem implements Parcelable {
         this.size = size;
         this.humanReadableSize = sizeToHumanReadable(size);
         try {
-            this.modTime = rfc3339Parser.parseCalendar(modTime).getTimeInMillis();
+            this.modTime = Rfc3339Helper.parseCalendar(modTime).getTimeInMillis();
         } catch (ParseException e) {
             this.modTime = -1;
         }

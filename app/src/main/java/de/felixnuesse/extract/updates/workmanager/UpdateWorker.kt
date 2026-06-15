@@ -7,12 +7,9 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import ca.pkay.rcloneexplorer.BuildConfig
 import ca.pkay.rcloneexplorer.R
-import com.sharkaboi.appupdatechecker.AppUpdateChecker
-import com.sharkaboi.appupdatechecker.models.AppUpdateCheckerException
-import com.sharkaboi.appupdatechecker.models.UpdateResult
-import com.sharkaboi.appupdatechecker.sources.github.GithubTagSource
-import com.sharkaboi.appupdatechecker.versions.DefaultStringVersionComparator
-import com.sharkaboi.appupdatechecker.versions.VersionComparator
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 import de.felixnuesse.extract.extensions.tag
 import de.felixnuesse.extract.notifications.AppUpdateNotification
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -47,36 +44,38 @@ class UpdateWorker (private var mContext: Context, workerParams: WorkerParameter
             }
         }
 
-        val source =  GithubTagSource(
-            ownerUsername = "newhinton",
-            repoName = "Round-Sync",
-            currentVersion = BuildConfig.VERSION_NAME
-        )
-
-        val customVersionComparator = object : VersionComparator<String> {
-            override fun isNewerVersion(currentVersion: String, newVersion: String): Boolean {
-                return DefaultStringVersionComparator.isNewerVersion(
-                    currentVersion.substringBefore('-'),
-                    newVersion.substringBefore('-')
-                )
-            }
-        }
-        source.setCustomVersionComparator(customVersionComparator)
-
+        val client = OkHttpClient.Builder().build()
+        val request = Request.Builder()
+            .url("https://api.github.com/repos/newhinton/Round-Sync/releases/latest")
+            .header("User-Agent", "Round-Sync-App")
+            .build()
 
         CoroutineScope(Dispatchers.IO).launch( CoroutineExceptionHandler { _, throwable ->
-            if (throwable is AppUpdateCheckerException) {
-                Log.e(tag(), "Error: ${throwable.message}")
-            }
+            Log.e(tag(), "Error checking updates: ${throwable.message}")
         }) {
-            when (val result = AppUpdateChecker(source).checkUpdate()) {
-                UpdateResult.NoUpdate -> setFoundVersion(BuildConfig.VERSION_NAME)
-                is UpdateResult.UpdateAvailable<*> -> {
-                    Log.e(tag(), "Update found : " + result.versionDetails.latestVersion.toString())
-                    setFoundVersion(result.versionDetails.latestVersion.toString())
-                    setChangelog(result.versionDetails.releaseNotes.toString())
-                    notifyIfRequired()
+            try {
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Log.e(tag(), "Failed to check update: HTTP ${response.code}")
+                        return@launch
+                    }
+                    val bodyStr = response.body?.string() ?: return@launch
+                    val json = JSONObject(bodyStr)
+                    val newVersion = json.getString("tag_name")
+                    val releaseNotes = json.optString("body", "")
+
+                    val currentVersion = BuildConfig.VERSION_NAME
+                    if (isNewerVersion(currentVersion, newVersion)) {
+                        Log.e(tag(), "Update found : $newVersion")
+                        setFoundVersion(newVersion)
+                        setChangelog(releaseNotes)
+                        notifyIfRequired()
+                    } else {
+                        setFoundVersion(currentVersion)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e(tag(), "Exception during update check: ${e.message}")
             }
         }
 
@@ -109,5 +108,21 @@ class UpdateWorker (private var mContext: Context, workerParams: WorkerParameter
     private fun setFoundVersion(version: String){
         val key = mContext.getString(R.string.pref_key_app_updates_found_update_for_version)
         preferenceManager.edit().putString(key, version).apply()
+    }
+
+    private fun isNewerVersion(current: String, new: String): Boolean {
+        val currClean = current.trim().removePrefix("v").substringBefore('-')
+        val newClean = new.trim().removePrefix("v").substringBefore('-')
+        if (currClean == newClean) return false
+        val currParts = currClean.split('.').mapNotNull { it.toIntOrNull() }
+        val newParts = newClean.split('.').mapNotNull { it.toIntOrNull() }
+        val maxParts = maxOf(currParts.size, newParts.size)
+        for (i in 0 until maxParts) {
+            val currPart = currParts.getOrElse(i) { 0 }
+            val newPart = newParts.getOrElse(i) { 0 }
+            if (newPart > currPart) return true
+            if (newPart < currPart) return false
+        }
+        return false
     }
 }
