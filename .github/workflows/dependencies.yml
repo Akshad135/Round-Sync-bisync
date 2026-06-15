@@ -59,7 +59,7 @@ jobs:
           # prepare scanapk with apktool.
           wget https://github.com/iBotPeaches/Apktool/releases/download/v$apktoolVersion/apktool_$apktoolVersion.jar
           # Wrapper for apktool_*.jar
-          wget https://github.com/iBotPeaches/Apktool/raw/master/scripts/linux/apktool
+          wget https://github.com/iBotPeaches/Apktool/raw/main/scripts/linux/apktool
           # clone izzy's repo with the scan tools
           git clone https://gitlab.com/IzzyOnDroid/repo.git
           # create a directory for Apktool and move the apktool* files there
