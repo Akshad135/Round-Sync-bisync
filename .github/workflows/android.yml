@@ -34,33 +34,59 @@ jobs:
       run: |
         for i in 1 2 3; do
           echo "Build attempt $i..."
-          ./gradlew assembleOssDebug && break
+          ./gradlew assembleOssDebug assembleOssRelease && break
           echo "Build attempt $i failed, retrying in 30s..."
           sleep 30
         done
-    - name: Upload APK (arm)
+    - name: Upload Debug APK (arm)
       uses: actions/upload-artifact@v4
       with:
         name: nightly-armeabi.apk
         path: ${{ github.workspace }}/app/build/outputs/apk/oss/debug/*-oss-armeabi-v7a-debug.apk
-    - name: Upload APK (arm64)
+    - name: Upload Debug APK (arm64)
       uses: actions/upload-artifact@v4
       with:
         name: nightly-arm64.apk
         path: ${{ github.workspace }}/app/build/outputs/apk/oss/debug/*-oss-arm64-v8a-debug.apk
-    - name: Upload APK (x86)
+    - name: Upload Debug APK (x86)
       uses: actions/upload-artifact@v4
       with:
         name: nightly-x86.apk
         path: ${{ github.workspace }}/app/build/outputs/apk/oss/debug/*-oss-x86-debug.apk
-    - name: Upload APK (arm)
+    - name: Upload Debug APK (x64)
       uses: actions/upload-artifact@v4
       with:
         name: nightly-x64.apk
         path: ${{ github.workspace }}/app/build/outputs/apk/oss/debug/*-oss-x86_64-debug.apk
-    - name: Upload APK (universal)
+    - name: Upload Debug APK (universal)
       uses: actions/upload-artifact@v4
       with:
         name: nightly-universal.apk
         path: ${{ github.workspace }}/app/build/outputs/apk/oss/debug/*-oss-universal-debug.apk
+        retention-days: 14
+    - name: Upload Release APK (arm)
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-armeabi.apk
+        path: ${{ github.workspace }}/app/build/outputs/apk/oss/release/*-oss-armeabi-v7a-release.apk
+    - name: Upload Release APK (arm64)
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-arm64.apk
+        path: ${{ github.workspace }}/app/build/outputs/apk/oss/release/*-oss-arm64-v8a-release.apk
+    - name: Upload Release APK (x86)
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-x86.apk
+        path: ${{ github.workspace }}/app/build/outputs/apk/oss/release/*-oss-x86-release.apk
+    - name: Upload Release APK (x64)
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-x64.apk
+        path: ${{ github.workspace }}/app/build/outputs/apk/oss/release/*-oss-x86_64-release.apk
+    - name: Upload Release APK (universal)
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-universal.apk
+        path: ${{ github.workspace }}/app/build/outputs/apk/oss/release/*-oss-universal-release.apk
         retention-days: 14
