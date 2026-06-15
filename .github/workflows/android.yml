@@ -31,7 +31,13 @@ jobs:
         NDK_VERSION="$(grep -E "^de\.felixnuesse\.extract\.ndkVersion=" gradle.properties | cut -d'=' -f2)"
         sdkmanager "ndk;${NDK_VERSION}"
     - name: Build app
-      run: ./gradlew assembleOssDebug
+      run: |
+        for i in 1 2 3; do
+          echo "Build attempt $i..."
+          ./gradlew assembleOssDebug && break
+          echo "Build attempt $i failed, retrying in 30s..."
+          sleep 30
+        done
     - name: Upload APK (arm)
       uses: actions/upload-artifact@v4
       with:
