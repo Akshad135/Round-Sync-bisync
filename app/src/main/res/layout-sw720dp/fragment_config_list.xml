@@ -25,7 +25,7 @@
         android:layout_marginBottom="32dp"
         android:clickable="true"
         android:focusable="true"
-        android:src="@drawable/ic_appintro_arrow"
+        android:src="@drawable/ic_arrow_right"
         android:visibility="invisible"
         android:contentDescription="@string/remote_creation_next_step"
         app:layout_constraintBottom_toBottomOf="parent"
